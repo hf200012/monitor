@@ -8,6 +8,7 @@ import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import java.io.ByteArrayInputStream;
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -119,6 +120,29 @@ public class MonitorQueryService {
             return b;
         }
         return new byte[0];
+    }
+
+    @GET
+    @Path("/getRecord/{rowkey}/{type}")
+    @Produces(MediaType.APPLICATION_JSON)
+    public RecordBean getRecord(@PathParam("rowkey") String rowkey,@PathParam("type") String type) {
+        Query query = new HBaseQuery();
+        RecordBean bean = new RecordBean();
+        Record record = query.getRecord(rowkey,type);
+        List<Record> records = new ArrayList<Record>();
+        if(record != null){
+            records.add(record);
+        }
+        bean.setCode(200);
+        if( records.size() > 0){
+            bean.setTotal(records.size());
+            bean.setRecords(records);
+        } else {
+            bean.setTotal(0);
+            bean.setRecords(records);
+        }
+        bean.setMsg("ok");
+        return bean;
     }
 
 }

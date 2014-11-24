@@ -47,5 +47,13 @@ public interface Query {
      * @return
      */
     public byte[] queryFaceImg(String rowkey) ;
+
+    /**
+     * 根据rowkey获取相关的记录
+     * @param rowkey
+     * @param type 1:人像，2：人脸
+     * @return
+     */
+    public Record getRecord(String rowkey,String type);
 	
 }

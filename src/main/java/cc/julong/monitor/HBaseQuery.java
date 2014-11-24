@@ -162,14 +162,14 @@ public class HBaseQuery implements Query{
      * @param rowkey
      * @return
      */
-    public byte[] getFeatureImgByRowkey(String rowkey,String tableName){
+    public byte[] getFeatureImgByRowkey(String rowkey,String tableName,String colName){
         HTableInterface table = null;
         try {
             table = new HTable(conf, tableName);
             Get get = new Get(Bytes.toBytes(rowkey));
-            get.addColumn(Bytes.toBytes("cf"), Bytes.toBytes("c2"));
+            get.addColumn(Bytes.toBytes("cf"), Bytes.toBytes(colName));
             Result res = table.get(get);
-            byte[] val = res.getValue(Bytes.toBytes("cf"),Bytes.toBytes("c2"));
+            byte[] val = res.getValue(Bytes.toBytes("cf"),Bytes.toBytes(colName));
             return val;
         }catch(Exception e){
             e.printStackTrace();
@@ -262,7 +262,7 @@ public class HBaseQuery implements Query{
 
     public byte[] queryImg(String rowkey) {
         try{
-            return this.getFeatureImgByRowkey(rowkey,"FSN_VEDIO");
+            return this.getFeatureImgByRowkey(rowkey,"FSN_VEDIO","c2");
         }catch(Exception e){
             e.printStackTrace();
         }
@@ -379,7 +379,37 @@ public class HBaseQuery implements Query{
      */
     public byte[] queryFaceImg(String rowkey) {
         try{
-            return this.getFeatureImgByRowkey(rowkey,"FSN_FACE");
+            return this.getFeatureImgByRowkey(rowkey,"FSN_FACE","c1");
+        }catch(Exception e){
+            e.printStackTrace();
+        }
+        return null;
+    }
+
+
+
+    /**
+     * 根据rowkey获取相关的记录
+     * @param rowkey
+     * @return
+     */
+    public Record getRecord(String rowkey,String type){
+        try{
+            byte[] record = null;
+            if(type.equals("1")) {
+                record = this.getFeatureImgByRowkey(rowkey, "FSN_VEDIO", "c1");
+            } else {
+                record = this.getFeatureImgByRowkey(rowkey, "FSN_FACE", "c2");
+            }
+            String value = new String(record);
+            Record record1 = new Record();
+            if(value.contains("|")) {
+                value = value.substring(0, value.lastIndexOf("|"));
+                record1.setRecordImgUrl(imageUrl + rowkey);
+                record1.setRecordText(value);
+                record1.setRowkey(rowkey);
+             }
+            return record1;
         }catch(Exception e){
             e.printStackTrace();
         }
