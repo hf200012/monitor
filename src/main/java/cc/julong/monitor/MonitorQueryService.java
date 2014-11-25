@@ -30,7 +30,26 @@ public class MonitorQueryService {
         RecordBean bean = new RecordBean();
         Query query = new HBaseQuery();
         List<Record> records = query.query(queryBean);
+        bean.setCode(200);
+        if(records != null){
+            bean.setTotal(records.size());
+            bean.setRecords(records);
+        } else {
+            bean.setTotal(0);
+            bean.setRecords(records);
+        }
+        bean.setMsg("ok");
+        return bean;
+    }
 
+    @POST
+    @Path("/queryBlackList")
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Produces(MediaType.APPLICATION_JSON)
+    public RecordBean queryBlackList(QueryBean queryBean){
+        RecordBean bean = new RecordBean();
+        Query query = new HBaseQuery();
+        List<Record> records = query.query(queryBean);
         bean.setCode(200);
         if(records != null){
             bean.setTotal(records.size());

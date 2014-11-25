@@ -416,4 +416,31 @@ public class HBaseQuery implements Query{
         return null;
     }
 
+
+    /**
+     * 查询黑名单
+     * @param query
+     * @return
+     */
+    public List<Record> queryBlackList(QueryBean query){
+        QueryStatusManager manager = new QueryStatusManager();
+        if(query.getChannelId().contains(",")){
+            String[] channelIds = query.getChannelId().split(",");
+            for(String ch : channelIds) {
+                query.setChannelId(ch);
+                manager.setStatus(query.getBlackListNo(), false);
+                //启动查询线程
+                Thread thread = new Thread(new QueryThread(manager, query.getBlackListNo(), query, conf, this.imageUrl, this.faceImgUrl));
+                thread.start();
+            }
+            while(!manager.isCompleted()){
+
+            }
+            LOG.info("query completed");
+            LOG.info("query total count :" + manager.getResults().size());
+            return manager.getResults();
+        }
+        return null;
+    }
+
 }

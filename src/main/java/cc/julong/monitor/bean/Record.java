@@ -10,6 +10,16 @@ public class Record {
 
     private Float featureBin;
 
+    private String featureList;
+
+    public String getFeatureList() {
+        return featureList;
+    }
+
+    public void setFeatureList(String featureList) {
+        this.featureList = featureList;
+    }
+
     public Float getFeatureBin() {
         return featureBin;
     }

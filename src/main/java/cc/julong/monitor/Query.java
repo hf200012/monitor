@@ -55,5 +55,12 @@ public interface Query {
      * @return
      */
     public Record getRecord(String rowkey,String type);
+
+    /**
+     * 查询黑名单
+     * @param query
+     * @return
+     */
+    public List<Record> queryBlackList(QueryBean query);
 	
 }

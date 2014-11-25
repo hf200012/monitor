@@ -17,6 +17,37 @@ public class QueryBean  {
 
     private int interval;
 
+    //黑名单编号
+    private String blackListNo;
+    //目标类型
+    private String type;
+    //报警阀值
+    private String warnValue;
+
+    public String getBlackListNo() {
+        return blackListNo;
+    }
+
+    public void setBlackListNo(String blackListNo) {
+        this.blackListNo = blackListNo;
+    }
+
+    public String getType() {
+        return type;
+    }
+
+    public void setType(String type) {
+        this.type = type;
+    }
+
+    public String getWarnValue() {
+        return warnValue;
+    }
+
+    public void setWarnValue(String warnValue) {
+        this.warnValue = warnValue;
+    }
+
     public String getTime() {
         return time;
     }
