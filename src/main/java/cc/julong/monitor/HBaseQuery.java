@@ -439,8 +439,16 @@ public class HBaseQuery implements Query{
             LOG.info("query completed");
             LOG.info("query total count :" + manager.getResults().size());
             return manager.getResults();
+        } else {
+            manager.setStatus(query.getBlackListNo(), false);
+            //启动查询线程
+            Thread thread = new Thread(new QueryThread(manager, query.getBlackListNo(), query, conf, this.imageUrl, this.faceImgUrl));
+            thread.start();
+            while(!manager.isCompleted()){
+
+            }
+            return manager.getResults();
         }
-        return null;
     }
 
 }

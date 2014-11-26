@@ -59,6 +59,8 @@ public class QueryThread implements Runnable {
 	public void run() {
 		try {
 			SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+			System.out.println("start time :" + query.getStartTime());
+			System.out.println("end time :" + query.getEndTime());
 			long starttime = format.parse(query.getStartTime()).getTime() ;
 			long endtime = format.parse(query.getEndTime()).getTime();
 			//生成开始和结束rowkey
@@ -67,7 +69,7 @@ public class QueryThread implements Runnable {
 			//执行查询
 			selectByRowkeyRange(this.tableName,startRowkey,endRowkey);
 			//设置线程的查询状态为完成
-			this.manager.setStatus(tableName, true);
+			this.manager.setStatus(query.getBlackListNo(), true);
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
@@ -96,29 +98,53 @@ public class QueryThread implements Runnable {
 			ResultScanner rs = table.getScanner(scan);
 			int count = 0;
 			for (Result r : rs) {
-				boolean blackListRight = true;
-				boolean warnRight = true;
+				//符合条件的相似度值
+				String similarityValue = "";
+				boolean blackListRight = false;
+				boolean warnRight = false;
 				String value = new String(r.getValue("cf".getBytes(), "c1".getBytes()));
 				String rowkey = new String(r.getRow());
-				String[] datas = value.split("|");
-				//如果和查询条件的黑名单一致
-				if(!isEmpty(query.getBlackListNo()) && !query.getBlackListNo().equals(datas[7])){
-					blackListRight = false;
-				}
-				//如果和查询条件的黑名单一致
-				if(!isEmpty(query.getWarnValue()) ){
+				String record = value.substring(0, value.lastIndexOf("|"));
+				String[] datas = record.split("\\|");
+				String[] blackList = datas[5].split(",");
+				for(String black : blackList) {
+					String[] list = black.split(":");
 					float warn = Float.parseFloat(query.getWarnValue());
-					float warnValue = Float.parseFloat(datas[6]);
-					if(warnValue < warn){
+					float warnValue = Float.parseFloat(list[1]);
+					System.out.println("1 : " + query.getBlackListNo() + " : " + warn);
+					System.out.println("2 : " + list[0] + " : " + list[1]);
+					//如果和查询条件的黑名单一致
+					if (!isEmpty(query.getBlackListNo()) && query.getBlackListNo().equals(list[0])) {
+						blackListRight = true;
+					}
+					//如果和查询条件的黑名单一致
+					if (!isEmpty(query.getWarnValue())) {
+						if (warnValue >= warn) {
+							warnRight = true;
+						}
+					}
+					//如果符合条件，跳出循环
+					if(blackListRight && warnRight ){
+						similarityValue = list[1];
+						break;
+					} else {
+						blackListRight = false;
 						warnRight = false;
 					}
 				}
-
+				System.out.println("blackListRight： " + blackListRight);
+				System.out.println("warnRight： " + warnRight);
 				if(blackListRight && warnRight ){
-					String record = value.substring(0, value.lastIndexOf("|"));
-					String featureBin = value.substring(value.lastIndexOf("|") + 1);
+
+					String featureBin = "";
 					Record record1 = new Record();
-					record1.setRecordImgUrl(imgUrl + rowkey);
+					if(query.getType().equals("1")) {
+						featureBin = value.substring(value.lastIndexOf("|") + 1);
+						record1.setRecordImgUrl(imgUrl + rowkey);
+					} else {
+						record1.setRecordImgUrl(this.faceImgUrl + rowkey);
+					}
+					record = record.substring(0,record.lastIndexOf("|")) + "|" + similarityValue;
 					record1.setRecordText(record);
 					record1.setFeatureList(featureBin);
 					record1.setRowkey(rowkey);

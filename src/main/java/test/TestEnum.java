@@ -27,6 +27,13 @@ public class TestEnum {
 
     public static void main(String args[]){
 
+//        for(int i = 0; i < 20 ; i ++){
+//            System.out.println("i = " + i);
+//            if(i == 12 ){
+//                break;
+//            }
+//        }
+
         Date date = new Date();
       //  date.setTime(1415081872001l);
         SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");

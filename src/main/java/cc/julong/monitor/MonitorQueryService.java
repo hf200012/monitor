@@ -49,7 +49,7 @@ public class MonitorQueryService {
     public RecordBean queryBlackList(QueryBean queryBean){
         RecordBean bean = new RecordBean();
         Query query = new HBaseQuery();
-        List<Record> records = query.query(queryBean);
+        List<Record> records = query.queryBlackList(queryBean);
         bean.setCode(200);
         if(records != null){
             bean.setTotal(records.size());
