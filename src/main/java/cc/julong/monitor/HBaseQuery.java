@@ -347,7 +347,7 @@ public class HBaseQuery implements Query{
                 if(rowkey.contains("_")) {
                     String[] datas = rowkey.split("_");
                     FaceRecord record = new FaceRecord();
-                    record.setFaceImgUrl(this.faceImgUrl + rowkey);
+                    record.setRecordImgUrl(this.faceImgUrl + rowkey);
                     record.setIp(datas[0]);
                     record.setPort(datas[1]);
                     long time = Long.parseLong(datas[2]);
@@ -379,7 +379,7 @@ public class HBaseQuery implements Query{
      */
     public byte[] queryFaceImg(String rowkey) {
         try{
-            return this.getFeatureImgByRowkey(rowkey,"FSN_FACE","c1");
+            return this.getFeatureImgByRowkey(rowkey,"FSN_FACE","c2");
         }catch(Exception e){
             e.printStackTrace();
         }
@@ -450,5 +450,22 @@ public class HBaseQuery implements Query{
             return manager.getResults();
         }
     }
+
+    public static void main(String args[]){
+        HTableInterface table = null;
+        try {
+            table = new HTable(conf, "FSN_VEDIO");
+            Scan scan = new Scan();
+            scan.addColumn(Bytes.toBytes("cf"),Bytes.toBytes("c1"));
+            ResultScanner rs = table.getScanner(scan);
+            for (Result r : rs) {
+                System.out.println(new String(r.getRow()));
+            }
+        }catch(Exception e){
+
+        }
+
+    }
+
 
 }

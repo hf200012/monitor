@@ -10,7 +10,7 @@ public class TestFaceHttp {
     public static void main(String args[]){
         //192.168.9.12_9876_1416366866894_29
         //172.3.6.2_3652_1416453486_0
-        String json = "{\"ip\": \"172.3.6.2\",\"port\": \"3652\",\"startTime\": \"1970-01-16 08:30:00\",\"endTime\": \"2014-11-19 18:20:00\"}";
+       String json = "{\"ip\": \"172.16.5.50\",\"port\": \"0\",\"startTime\": \"2014-11-27 14:43:21\",\"endTime\": \"2014-11-28 17:43:25\"}";
         String url = "http://192.168.9.2:8080/monitor/rest/video/queryFace";
         try {
             postRequest(json,url);

@@ -49,6 +49,14 @@
             <version>2.4</version>
         </dependency>
 
+
+
+
+        <dependency>
+            <groupId>org.apache.thrift</groupId>
+            <artifactId>libthrift</artifactId>
+            <version>0.9.1</version>
+        </dependency>
         <!--后续加的包-->
         <dependency>
             <groupId>commons-logging</groupId>

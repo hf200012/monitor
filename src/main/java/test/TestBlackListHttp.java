@@ -10,8 +10,10 @@ public class TestBlackListHttp {
     public static void main(String args[]){
         //192.168.9.12_9876_1416366866894_29
         //172.3.6.2_3652_1416453486_0
-        String json = "{\"channelId\": \"192.168.9.14_9087\",\"type\": \"2\",\"blackListNo\": \"111`\",\"warnValue\": \"0.26\",\"startTime\": \"2014-11-26 12:30:00\",\"endTime\": \"2014-11-26 12:59:00\"}";
-        String url = "http://192.168.9.2:8080/monitor/rest/video/queryBlackList";
+        //String json = "{\"channelId\": \"192.168.9.14_9087\",\"type\": \"2\",\"blackListNo\": \"222\",\"warnValue\": \"0.26\",\"startTime\": \"2014-11-26 12:30:00\",\"endTime\": \"2014-11-26 12:59:00\"}";
+        //String json = "{\"channelId\": \"172.16.5.50_0\",\"type\": \"2\",\"blackListNo\": \"1175581843\",\"warnValue\": \"0.3\",\"startTime\": \"2014-11-27 14:50:00\",\"endTime\": \"2014-11-27 20:29:42\"}";
+        String json = "{\"channelId\": \"172.16.5.50_0\",\"type\": \"2\",\"blackListNo\": \"1175581843\",\"warnValue\": \"0.0\",\"startTime\": \"2014-11-27 15:50:00\",\"endTime\": \"2015-12-08 13:20:00\"}";
+        String url = "http://localhost:8080/monitor/rest/video/queryBlackList";
         try {
             postRequest(json,url);
         } catch (IOException e) {
@@ -45,6 +47,7 @@ public class TestBlackListHttp {
         // 内容长度Content-Length: 38
         conn.setRequestProperty("Content-Type", "application/json; charset=UTF-8");
         conn.setRequestProperty("Content-Length", String.valueOf(data.length));
+        conn.setRequestProperty("Accept-Encoding", "gzip, deflate");
         OutputStream outStream = conn.getOutputStream();// 返回写入到此连接的输出流
         // 把二进制数据写入是输出流
         outStream.write(data);

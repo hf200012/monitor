@@ -1,7 +1,13 @@
 package test;
 
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.UnsupportedEncodingException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.zip.GZIPInputStream;
+import java.util.zip.GZIPOutputStream;
 
 /**
  * Created by zhangfeng on 2014/10/28.
@@ -33,10 +39,122 @@ public class TestEnum {
 //                break;
 //            }
 //        }
+//172.16.5.50_0_1417076922000_0
+//        Date date = new Date();
+//        date.setTime(1417395712635l);
+//        SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+//        System.out.println(format.format(date));
 
-        Date date = new Date();
-      //  date.setTime(1415081872001l);
-        SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-        System.out.println(date.getTime());
+        String test = "sssseeeeeeeeeeeeeeeeeeeeeeeeeeeeeeettttttttttttttttttttttttttttttt";
+        String str = "";
+        for(int i = 0 ; i < 100; i++){
+            str += test;
+        }
+        System.out.println(str.length());
+       byte[] json = null;
+        try {
+            json = compressToByte(str);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        System.out.println(json.length);
+
+        try {
+            String unjson = uncompressToString(json,"utf-8");
+            System.out.println("uncompress length "+ unjson.length());
+            System.out.println("uncompress "+ unjson);
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+
     }
+
+    /*
+       * 字节数组解压缩后返回字符串
+       */
+    public static String uncompressToString(byte[] b) {
+        if (b == null || b.length == 0) {
+            return null;
+        }
+        ByteArrayOutputStream out = new ByteArrayOutputStream();
+        ByteArrayInputStream in = new ByteArrayInputStream(b);
+        try {
+            GZIPInputStream gunzip = new GZIPInputStream(in);
+            byte[] buffer = new byte[256];
+            int n;
+            while ((n = gunzip.read(buffer)) >= 0) {
+                out.write(buffer, 0, n);
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return out.toString();
+    }
+
+    /*
+     * 字节数组解压缩后返回字符串
+     */
+    public static String uncompressToString(byte[] b, String encoding) {
+        if (b == null || b.length == 0) {
+            return null;
+        }
+        ByteArrayOutputStream out = new ByteArrayOutputStream();
+        ByteArrayInputStream in = new ByteArrayInputStream(b);
+
+        try {
+            GZIPInputStream gunzip = new GZIPInputStream(in);
+            byte[] buffer = new byte[256];
+            int n;
+            while ((n = gunzip.read(buffer)) >= 0) {
+                out.write(buffer, 0, n);
+            }
+            return out.toString(encoding);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
+    /*
+    * 字符串压缩为字节数组
+    */
+    public static byte[] compressToByte(String str) throws Exception{
+        if (str == null || str.length() == 0) {
+            return null;
+        }
+        ByteArrayOutputStream out = new ByteArrayOutputStream();
+        GZIPOutputStream gzip;
+        try {
+            gzip = new GZIPOutputStream(out);
+            gzip.write(str.getBytes("utf-8"));
+            gzip.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return out.toByteArray();
+    }
+
+    /*
+     * 字符串压缩为字节数组
+     */
+    public static byte[] compressToByte(String str,String encoding){
+        if (str == null || str.length() == 0) {
+            return null;
+        }
+        ByteArrayOutputStream out = new ByteArrayOutputStream();
+        GZIPOutputStream gzip;
+        try {
+            gzip = new GZIPOutputStream(out);
+            gzip.write(str.getBytes(encoding));
+            gzip.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return out.toByteArray();
+    }
+
+
+
 }

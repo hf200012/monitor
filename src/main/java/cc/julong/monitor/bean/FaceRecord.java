@@ -13,14 +13,14 @@ public class FaceRecord {
 
     private String personId;
 
-    private String faceImgUrl;
+    private String recordImgUrl;
 
-    public String getFaceImgUrl() {
-        return faceImgUrl;
+    public String getRecordImgUrl() {
+        return recordImgUrl;
     }
 
-    public void setFaceImgUrl(String faceImgUrl) {
-        this.faceImgUrl = faceImgUrl;
+    public void setRecordImgUrl(String faceImgUrl) {
+        this.recordImgUrl = faceImgUrl;
     }
 
     public String getIp() {

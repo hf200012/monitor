@@ -1,15 +1,21 @@
 package cc.julong.monitor;
 
 import cc.julong.monitor.bean.*;
+import net.sf.json.JSONObject;
 
 import javax.servlet.ServletContext;
+import javax.servlet.http.HttpServletResponse;
 import javax.ws.rs.*;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.zip.GZIPInputStream;
 
 /**
  * 监控视频数据查询Rest API接口
@@ -43,10 +49,12 @@ public class MonitorQueryService {
     }
 
     @POST
+    @Compress
     @Path("/queryBlackList")
     @Consumes(MediaType.APPLICATION_JSON)
-    @Produces(MediaType.APPLICATION_JSON)
-    public RecordBean queryBlackList(QueryBean queryBean){
+    //@Produces(MediaType.APPLICATION_JSON)
+    @Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
+    public RecordBean queryBlackList(QueryBean queryBean, @Context HttpServletResponse response){
         RecordBean bean = new RecordBean();
         Query query = new HBaseQuery();
         List<Record> records = query.queryBlackList(queryBean);
@@ -59,9 +67,69 @@ public class MonitorQueryService {
             bean.setRecords(records);
         }
         bean.setMsg("ok");
+        String json = JSONObject.fromObject(bean).toString();
+        String compressJson = null;
+        try {
+            compressJson = uncompressToString(json.getBytes("UTF-8"));
+        } catch (UnsupportedEncodingException e) {
+            e.printStackTrace();
+        }
+        System.out.print(compressJson);
+       // response.setHeader("Content-Encoding","gzip");
         return bean;
     }
 
+    /**
+     * 字节数组解压缩后返回字符串
+     * @param b
+     * @param encoding
+     * @return
+     */
+    public static String uncompressToString(byte[] b, String encoding) {
+        if (b == null || b.length == 0) {
+            return null;
+        }
+        ByteArrayOutputStream out = new ByteArrayOutputStream();
+        ByteArrayInputStream in = new ByteArrayInputStream(b);
+
+        try {
+            GZIPInputStream gunzip = new GZIPInputStream(in);
+            byte[] buffer = new byte[256];
+            int n;
+            while ((n = gunzip.read(buffer)) >= 0) {
+                out.write(buffer, 0, n);
+            }
+            return out.toString(encoding);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
+    /**
+     * 字节数组解压缩后返回字符串
+     * @param b
+     * @return
+     */
+    public static String uncompressToString(byte[] b) {
+        if (b == null || b.length == 0) {
+            return null;
+        }
+        ByteArrayOutputStream out = new ByteArrayOutputStream();
+        ByteArrayInputStream in = new ByteArrayInputStream(b);
+
+        try {
+            GZIPInputStream gunzip = new GZIPInputStream(in);
+            byte[] buffer = new byte[256];
+            int n;
+            while ((n = gunzip.read(buffer)) >= 0) {
+                out.write(buffer, 0, n);
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return out.toString();
+    }
 
     @POST
     @Path("/relationQuery")
@@ -105,6 +173,15 @@ public class MonitorQueryService {
             return Response.ok(new ByteArrayInputStream(b)).build();
         }
         return null;
+    }
+
+
+
+    @GET
+    @Produces(MediaType.APPLICATION_JSON)
+    @Compress
+    public String testCompress() {
+        return "testtttttttttttttttttttttttttttttttttttttttttttttttttt";
     }
 
     @POST

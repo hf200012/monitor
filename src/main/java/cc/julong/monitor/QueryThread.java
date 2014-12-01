@@ -66,8 +66,10 @@ public class QueryThread implements Runnable {
 			//生成开始和结束rowkey
 			String startRowkey = query.getChannelId() + "_" + starttime;
 			String endRowkey = query.getChannelId() + "_" + endtime;
+			System.out.println("startkey :" + startRowkey);
+			System.out.println("endRowkey :" + endRowkey);
 			//执行查询
-			selectByRowkeyRange(this.tableName,startRowkey,endRowkey);
+			selectByRowkeyRange(this.tableName, startRowkey,endRowkey);
 			//设置线程的查询状态为完成
 			this.manager.setStatus(query.getBlackListNo(), true);
 		} catch (Exception e) {
@@ -105,35 +107,38 @@ public class QueryThread implements Runnable {
 				String value = new String(r.getValue("cf".getBytes(), "c1".getBytes()));
 				String rowkey = new String(r.getRow());
 				String record = value.substring(0, value.lastIndexOf("|"));
+
 				String[] datas = record.split("\\|");
-				String[] blackList = datas[5].split(",");
-				for(String black : blackList) {
-					String[] list = black.split(":");
-					float warn = Float.parseFloat(query.getWarnValue());
-					float warnValue = Float.parseFloat(list[1]);
-					System.out.println("1 : " + query.getBlackListNo() + " : " + warn);
-					System.out.println("2 : " + list[0] + " : " + list[1]);
-					//如果和查询条件的黑名单一致
-					if (!isEmpty(query.getBlackListNo()) && query.getBlackListNo().equals(list[0])) {
-						blackListRight = true;
-					}
-					//如果和查询条件的黑名单一致
-					if (!isEmpty(query.getWarnValue())) {
-						if (warnValue >= warn) {
-							warnRight = true;
+
+				if(datas.length >= 6) {
+					if( datas[5] != null &&  !datas[5].equals("")) {
+						String[] blackList = datas[5].split(",");
+						for (String black : blackList) {
+							String[] list = black.split(":");
+							float warn = Float.parseFloat(query.getWarnValue());
+							float warnValue = Float.parseFloat(list[1]);
+							//如果和查询条件的黑名单一致
+							if (!isEmpty(query.getBlackListNo()) && query.getBlackListNo().equals(list[0])) {
+								blackListRight = true;
+							}
+							//如果和查询条件的黑名单一致
+							if (!isEmpty(query.getWarnValue())) {
+								if (warnValue >= warn) {
+									warnRight = true;
+								}
+							}
+							//如果符合条件，跳出循环
+							if (blackListRight && warnRight) {
+								similarityValue = list[1];
+								break;
+							} else {
+								blackListRight = false;
+								warnRight = false;
+							}
 						}
 					}
-					//如果符合条件，跳出循环
-					if(blackListRight && warnRight ){
-						similarityValue = list[1];
-						break;
-					} else {
-						blackListRight = false;
-						warnRight = false;
-					}
 				}
-				System.out.println("blackListRight： " + blackListRight);
-				System.out.println("warnRight： " + warnRight);
+
 				if(blackListRight && warnRight ){
 
 					String featureBin = "";
@@ -146,7 +151,7 @@ public class QueryThread implements Runnable {
 					}
 					record = record.substring(0,record.lastIndexOf("|")) + "|" + similarityValue;
 					record1.setRecordText(record);
-					record1.setFeatureList(featureBin);
+					//record1.setFeatureList(featureBin);
 					record1.setRowkey(rowkey);
 					manager.getResults().add(record1);
 					count ++;
