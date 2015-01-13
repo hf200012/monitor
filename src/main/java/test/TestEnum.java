@@ -40,25 +40,25 @@ public class TestEnum {
 //            }
 //        }
 //172.16.5.50_0_1417076922000_0
-//        Date date = new Date();
-//        date.setTime(1417395712635l);
-//        SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-//        System.out.println(format.format(date));
+        Date date = new Date();
+        date.setTime(1421028178943l);
+        SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+        System.out.println(format.format(date));
 
-        String test = "sssseeeeeeeeeeeeeeeeeeeeeeeeeeeeeeettttttttttttttttttttttttttttttt";
+        String test = "压缩前数据长度压缩前数据长度压缩前数据长度压缩前数据长度压缩前数据长度SimpleDateFormat format = new SimpleDateFormatSimpleDateFormat format = new SimpleDateFormat";
         String str = "";
         for(int i = 0 ; i < 100; i++){
             str += test;
         }
-        System.out.println(str.length());
+        System.out.println("压缩前数据长度 : " + str.getBytes().length);
        byte[] json = null;
         try {
-            json = compressToByte(str);
+            json = compressToByte(str,"UTF-8");
         } catch (Exception e) {
             e.printStackTrace();
         }
-        System.out.println(json.length);
-
+        System.out.println("压缩后数据长度 : " + json.length);
+        System.out.println(new String(json));
         try {
             String unjson = uncompressToString(json,"utf-8");
             System.out.println("uncompress length "+ unjson.length());
@@ -71,9 +71,11 @@ public class TestEnum {
 
     }
 
-    /*
-       * 字节数组解压缩后返回字符串
-       */
+    /**
+     * 对压缩后的字节码进行解压缩，然后将解压缩后的数据转换成字符串
+     * @param b
+     * @return
+     */
     public static String uncompressToString(byte[] b) {
         if (b == null || b.length == 0) {
             return null;
@@ -93,8 +95,12 @@ public class TestEnum {
         return out.toString();
     }
 
-    /*
-     * 字节数组解压缩后返回字符串
+
+    /**
+     * 对压缩后的字节码按照指定的字符集进行解压缩，然后将解压缩后的数据转换成字符串
+     * @param b
+     * @param encoding
+     * @return
      */
     public static String uncompressToString(byte[] b, String encoding) {
         if (b == null || b.length == 0) {
@@ -102,7 +108,6 @@ public class TestEnum {
         }
         ByteArrayOutputStream out = new ByteArrayOutputStream();
         ByteArrayInputStream in = new ByteArrayInputStream(b);
-
         try {
             GZIPInputStream gunzip = new GZIPInputStream(in);
             byte[] buffer = new byte[256];
@@ -117,9 +122,12 @@ public class TestEnum {
         return null;
     }
 
-    /*
-    * 字符串压缩为字节数组
-    */
+    /**
+     * 对字符串进行压缩
+     * @param str
+     * @return
+     * @throws Exception
+     */
     public static byte[] compressToByte(String str) throws Exception{
         if (str == null || str.length() == 0) {
             return null;
@@ -136,8 +144,11 @@ public class TestEnum {
         return out.toByteArray();
     }
 
-    /*
-     * 字符串压缩为字节数组
+    /**
+     * 对字符串按照指定字符集进行压缩
+     * @param str
+     * @param encoding
+     * @return
      */
     public static byte[] compressToByte(String str,String encoding){
         if (str == null || str.length() == 0) {

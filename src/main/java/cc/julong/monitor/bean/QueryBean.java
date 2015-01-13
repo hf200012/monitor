@@ -16,13 +16,22 @@ public class QueryBean  {
     private String time;
 
     private int interval;
-
     //黑名单编号
     private String blackListNo;
     //目标类型
     private String type;
     //报警阀值
     private String warnValue;
+    //黑名单及其对应的告警阀值，可以使多个，之间用逗号隔开，格式是:黑名单1:告警阀值,黑名单2:告警阀值,黑名单3:告警阀值...
+    private String blackListAndWarnValue;
+
+    public String getBlackListAndWarnValue() {
+        return blackListAndWarnValue;
+    }
+
+    public void setBlackListAndWarnValue(String blackListAndWarnValue) {
+        this.blackListAndWarnValue = blackListAndWarnValue;
+    }
 
     public String getBlackListNo() {
         return blackListNo;

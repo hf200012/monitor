@@ -2,6 +2,7 @@ package cc.julong.monitor;
 
 import java.io.IOException;
 import java.text.SimpleDateFormat;
+import java.util.Date;
 
 import cc.julong.monitor.bean.QueryBean;
 import cc.julong.monitor.bean.Record;
@@ -14,6 +15,7 @@ import org.apache.hadoop.hbase.client.ResultScanner;
 import org.apache.hadoop.hbase.client.Scan;
 import org.apache.hadoop.hbase.filter.Filter;
 import org.apache.hadoop.hbase.filter.InclusiveStopFilter;
+import org.apache.hadoop.hbase.util.Bytes;
 import org.apache.log4j.Logger;
 
 
@@ -59,8 +61,8 @@ public class QueryThread implements Runnable {
 	public void run() {
 		try {
 			SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-			System.out.println("start time :" + query.getStartTime());
-			System.out.println("end time :" + query.getEndTime());
+			Date start = new Date();
+			LOG.info("QueryThread.queryBlackList thread ID :["+ Thread.currentThread().getId() +" ] ========= start time : " + format.format(start));
 			long starttime = format.parse(query.getStartTime()).getTime() ;
 			long endtime = format.parse(query.getEndTime()).getTime();
 			//生成开始和结束rowkey
@@ -72,6 +74,10 @@ public class QueryThread implements Runnable {
 			selectByRowkeyRange(this.tableName, startRowkey,endRowkey);
 			//设置线程的查询状态为完成
 			this.manager.setStatus(query.getBlackListNo(), true);
+			Date end = new Date();
+			LOG.info("QueryThread.queryBlackList thread ID :["+ Thread.currentThread().getId() +" ]========= start time : " + format.format(end));
+			LOG.info("HBaseQuery.queryBlackList  thread ID :["+ Thread.currentThread().getId() +" ]========= cost time : " + (end.getTime() - start.getTime())/1000 +" s");
+
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
@@ -96,6 +102,7 @@ public class QueryThread implements Runnable {
 			//设置scan的扫描范围由startRowkey开始
 			Filter filter =new InclusiveStopFilter(endRowkey.getBytes());
 			scan.setFilter(filter);
+			scan.addColumn(Bytes.toBytes("cf"), Bytes.toBytes("c1"));
 			//设置scan扫描到endRowkey停止，因为setStopRow是开区间，InclusiveStopFilter设置的是闭区间
 			ResultScanner rs = table.getScanner(scan);
 			int count = 0;
@@ -114,6 +121,7 @@ public class QueryThread implements Runnable {
 					if( datas[5] != null &&  !datas[5].equals("")) {
 						String[] blackList = datas[5].split(",");
 						for (String black : blackList) {
+							//拆分黑名单和对应的预警阀值
 							String[] list = black.split(":");
 							float warn = Float.parseFloat(query.getWarnValue());
 							float warnValue = Float.parseFloat(list[1]);

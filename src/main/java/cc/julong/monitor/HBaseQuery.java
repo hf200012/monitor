@@ -14,9 +14,12 @@ import cc.julong.monitor.bean.Record;
 import cc.julong.monitor.util.PropertiesHelper;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.hbase.HBaseConfiguration;
+import org.apache.hadoop.hbase.HColumnDescriptor;
+import org.apache.hadoop.hbase.HTableDescriptor;
 import org.apache.hadoop.hbase.client.*;
 import org.apache.hadoop.hbase.filter.Filter;
 import org.apache.hadoop.hbase.filter.InclusiveStopFilter;
+import org.apache.hadoop.hbase.io.compress.Compression;
 import org.apache.hadoop.hbase.util.Bytes;
 import org.apache.log4j.Logger;
 
@@ -80,7 +83,9 @@ public class HBaseQuery implements Query{
 	private  List<Record> exactMatch(QueryBean query) throws Exception {
 		SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 		HBaseAdmin hbaseadmin = null;
-		try{
+        Date st = new Date();
+        LOG.info("HBaseQuery.query.exactMatch ========= start time : " + format.format(st));
+        try{
     		hbaseadmin = new HBaseAdmin(conf);
 			//如果表不存在
 			if(!hbaseadmin.tableExists("FSN_VEDIO")){
@@ -91,6 +96,13 @@ public class HBaseQuery implements Query{
                 String startKey = query.getChannelId() + "_" + start.getTime();
                 String stopKey = query.getChannelId() + "_" + end.getTime();
                 List<Record> records = selectByRowkeyRange("FSN_VEDIO",startKey,stopKey,query);
+                LOG.info( "FSN_VIDEO query result : " + records.size());
+                Date ed = new Date();
+                LOG.info("HBaseQuery.query.exactMatch ========= start time : " + format.format(ed));
+                LOG.info("HBaseQuery.query.exactMatch == query completed");
+                LOG.info("HBaseQuery.query.exactMatch == query total count :" + records.size());
+                LOG.info("HBaseQuery.query.exactMatch ========= cost time : " + (end.getTime() - start.getTime())/1000 +" s");
+
                 return records;
 			}
 		}catch(Exception e){
@@ -247,6 +259,7 @@ public class HBaseQuery implements Query{
                 String startKey = query.getChannelId() + "_" + start;
                 String stopKey = query.getChannelId() + "_" + end + "1";
                 List<Record> records = selectByRowkeyRange("FSN_VEDIO",startKey,stopKey,query);
+
                 return records;
             }
         }catch(Exception e){
@@ -257,6 +270,32 @@ public class HBaseQuery implements Query{
             }
         }
         return null;
+    }
+
+    /**
+     * 创建hbase表，对表根据给定的startkey和endkey进行预分配region
+     * @throws Exception
+     */
+    public boolean createTable(String tableName){
+        try {
+            HBaseAdmin admin = new HBaseAdmin(conf);
+            // 判断表是否存在，如果不存在创建表，如果存在直接插入数据
+            if (!admin.tableExists(tableName)) {
+                //创建表的column family
+                HColumnDescriptor cf = new HColumnDescriptor("cf");
+                //设置数据的压缩方式为SNAPPY
+                cf.setCompactionCompressionType(Compression.Algorithm.SNAPPY);
+                cf.setCompressionType(Compression.Algorithm.SNAPPY);
+                //创建表
+                HTableDescriptor td = new HTableDescriptor(tableName);
+                td.addFamily(cf);
+                admin.createTable(td);
+                return true;
+            }
+        }catch(Exception e){
+            e.printStackTrace();
+        }
+        return false;
     }
 
 
@@ -423,6 +462,9 @@ public class HBaseQuery implements Query{
      * @return
      */
     public List<Record> queryBlackList(QueryBean query){
+        Date start = new Date();
+        SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+        LOG.info("HBaseQuery.queryBlackList ========= start time : " + format.format(start));
         QueryStatusManager manager = new QueryStatusManager();
         if(query.getChannelId().contains(",")){
             String[] channelIds = query.getChannelId().split(",");
@@ -436,8 +478,11 @@ public class HBaseQuery implements Query{
             while(!manager.isCompleted()){
 
             }
-            LOG.info("query completed");
-            LOG.info("query total count :" + manager.getResults().size());
+            Date end = new Date();
+            LOG.info("HBaseQuery.queryBlackList.mutil.channelID  ========= start time : " + format.format(end));
+            LOG.info("HBaseQuery.queryBlackList.mutil.channelID query completed");
+            LOG.info("HBaseQuery.queryBlackList.mutil.channelID query total count :" + manager.getResults().size());
+            LOG.info("HBaseQuery.queryBlackList.mutil.channelID  ========= cost time : " + (end.getTime() - start.getTime())/1000 +" s");
             return manager.getResults();
         } else {
             manager.setStatus(query.getBlackListNo(), false);
@@ -447,6 +492,61 @@ public class HBaseQuery implements Query{
             while(!manager.isCompleted()){
 
             }
+            Date end = new Date();
+            LOG.info("HBaseQuery.queryBlackListt.single.channelID ========= start time : " + format.format(end));
+            LOG.info("HBaseQuery.queryBlackListt.single.channelID query completed");
+            LOG.info("HBaseQuery.queryBlackListt.single.channelID query total count :" + manager.getResults().size());
+            LOG.info("HBaseQuery.queryBlackListt.single.channelID ========= cost time : " + (end.getTime() - start.getTime())/1000 +" s");
+            LOG.info("HBaseQuery.queryBlackList.single.channelID query cost time : " +(end.getTime() - start.getTime()) / 1000 +" s");
+            return manager.getResults();
+        }
+    }
+
+
+
+    /**
+     * 查询黑名单
+     * @param query
+     * @return
+     */
+    public List<Record> queryMutilBlackList(QueryBean query){
+        QueryStatusManager manager = new QueryStatusManager();
+        Date start = new Date();
+        SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+        LOG.info("HBaseQuery.queryMutilBlackList ========= start time : " + format.format(start));
+        if(query.getChannelId().contains(",")){
+            LOG.info("HBaseQuery.queryMutilBlackList ========= start time : " + format.format(start));
+            String[] channelIds = query.getChannelId().split(",");
+            for(String ch : channelIds) {
+               // query.setChannelId(ch);
+                manager.setStatus(ch, false);
+                //启动查询线程
+//                Thread thread = new Thread(new CoprocessorQueryThread("FSN_VEDIO",conf,manager,query,ch));
+                Thread thread = new Thread(new MutilQueryThread(manager,ch, query, conf, this.imageUrl, this.faceImgUrl));
+                thread.start();
+            }
+            while(!manager.isCompleted()){
+
+            }
+            Date end = new Date();
+            LOG.info("HBaseQuery.queryMutilBlackList.mutil.channelID ========= end time : " + format.format(end));
+            LOG.info("HBaseQuery.queryMutilBlackList.mutil.channelID query completed");
+            LOG.info("HBaseQuery.queryMutilBlackList.mutil.channelID query total count :" + manager.getResults().size());
+            LOG.info("HBaseQuery.queryMutilBlackList.mutil.channelID query cost time : " +(end.getTime() - start.getTime()) / 1000 +" s");
+            return manager.getResults();
+        } else {
+            manager.setStatus(query.getChannelId(), false);
+            //启动查询线程
+            Thread thread = new Thread(new MutilQueryThread(manager,query.getChannelId(), query, conf, this.imageUrl, this.faceImgUrl));
+            thread.start();
+            while(!manager.isCompleted()){
+//                LOG.info("============================= state : " + manager.isCompleted());
+            }
+            Date end = new Date();
+            LOG.info("HBaseQuery.queryMutilBlackList.single.channelID ========= end time : " + format.format(end));
+            LOG.info("HBaseQuery.queryMutilBlackList.single.channelID query completed");
+            LOG.info("HBaseQuery.queryMutilBlackList.single.channelID query total count :" + manager.getResults().size());
+            LOG.info("HBaseQuery.queryMutilBlackList.single.channelID query cost time : " +(end.getTime() - start.getTime()) / 1000 +" s");
             return manager.getResults();
         }
     }

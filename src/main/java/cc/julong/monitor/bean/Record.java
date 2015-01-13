@@ -12,6 +12,16 @@ public class Record {
 
     private String featureList;
 
+    private String blackListNo;
+
+    public String getBlackListNo() {
+        return blackListNo;
+    }
+
+    public void setBlackListNo(String blackListNo) {
+        this.blackListNo = blackListNo;
+    }
+
     public String getFeatureList() {
         return featureList;
     }

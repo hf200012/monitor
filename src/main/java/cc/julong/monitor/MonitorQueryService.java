@@ -2,6 +2,7 @@ package cc.julong.monitor;
 
 import cc.julong.monitor.bean.*;
 import net.sf.json.JSONObject;
+import org.apache.log4j.Logger;
 
 import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletResponse;
@@ -25,6 +26,7 @@ import java.util.zip.GZIPInputStream;
 @Path("/video")
 public class MonitorQueryService {
 
+    private static final Logger LOG = Logger.getLogger(MonitorQueryService.class);
     @Context
     private ServletContext servletContext;
 
@@ -33,6 +35,7 @@ public class MonitorQueryService {
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
     public RecordBean query(QueryBean queryBean){
+        LOG.info("MonitorQueryService.query ========================= query condition :" + JSONObject.fromObject(queryBean).toString());
         RecordBean bean = new RecordBean();
         Query query = new HBaseQuery();
         List<Record> records = query.query(queryBean);
@@ -45,16 +48,17 @@ public class MonitorQueryService {
             bean.setRecords(records);
         }
         bean.setMsg("ok");
+        //LOG.info("MonitorQueryService.query ========================= return result :" + JSONObject.fromObject(bean).toString());
         return bean;
     }
 
     @POST
-    @Compress
     @Path("/queryBlackList")
     @Consumes(MediaType.APPLICATION_JSON)
     //@Produces(MediaType.APPLICATION_JSON)
     @Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
     public RecordBean queryBlackList(QueryBean queryBean, @Context HttpServletResponse response){
+        LOG.info("MonitorQueryService.queryBlackList ========================= query condition :" + JSONObject.fromObject(queryBean).toString());
         RecordBean bean = new RecordBean();
         Query query = new HBaseQuery();
         List<Record> records = query.queryBlackList(queryBean);
@@ -67,15 +71,7 @@ public class MonitorQueryService {
             bean.setRecords(records);
         }
         bean.setMsg("ok");
-        String json = JSONObject.fromObject(bean).toString();
-        String compressJson = null;
-        try {
-            compressJson = uncompressToString(json.getBytes("UTF-8"));
-        } catch (UnsupportedEncodingException e) {
-            e.printStackTrace();
-        }
-        System.out.print(compressJson);
-       // response.setHeader("Content-Encoding","gzip");
+       // LOG.info("MonitorQueryService.queryBlackList ========================= return result :" + JSONObject.fromObject(bean).toString());
         return bean;
     }
 
@@ -136,6 +132,7 @@ public class MonitorQueryService {
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
     public RecordBean relationQuery(QueryBean queryBean){
+        LOG.info("MonitorQueryService.relationQuery ========================= query condition :" + JSONObject.fromObject(queryBean).toString());
         RecordBean bean = new RecordBean();
         Query query = new HBaseQuery();
         List<Record> records = query.relationQuery(queryBean);
@@ -148,6 +145,8 @@ public class MonitorQueryService {
             bean.setRecords(records);
         }
         bean.setMsg("ok");
+        //LOG.info("MonitorQueryService.relationQuery ========================= return result :" + JSONObject.fromObject(bean).toString());
+
         return bean;
     }
 
@@ -175,20 +174,12 @@ public class MonitorQueryService {
         return null;
     }
 
-
-
-    @GET
-    @Produces(MediaType.APPLICATION_JSON)
-    @Compress
-    public String testCompress() {
-        return "testtttttttttttttttttttttttttttttttttttttttttttttttttt";
-    }
-
     @POST
     @Path("/queryFace")
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
     public FaceResponse queryFace(FaceQuery queryBean){
+        LOG.info("MonitorQueryService.queryFace ========================= query condition :" + JSONObject.fromObject(queryBean).toString());
         FaceResponse bean = new FaceResponse();
         Query query = new HBaseQuery();
         List<FaceRecord> records = query.queryFace(queryBean);
@@ -202,6 +193,7 @@ public class MonitorQueryService {
             bean.setRecords(records);
         }
         bean.setMsg("ok");
+       // LOG.info("MonitorQueryService.queryFace ========================= return result :" + JSONObject.fromObject(bean).toString());
         return bean;
     }
 
@@ -239,6 +231,16 @@ public class MonitorQueryService {
         }
         bean.setMsg("ok");
         return bean;
+    }
+
+
+    @GET
+    @Path("/createTable/{tableName}")
+    @Produces(MediaType.APPLICATION_JSON)
+    public boolean createTable(@PathParam("tableName") String tableName) {
+        Query query = new HBaseQuery();
+        boolean success = query.createTable(tableName);
+        return success;
     }
 
 }

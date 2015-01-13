@@ -1,6 +1,7 @@
 package cc.julong.monitor;
 
 import cc.julong.monitor.bean.Record;
+import org.apache.log4j.Logger;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -15,9 +16,19 @@ import java.util.Map;
  *
  */
 public class QueryStatusManager {
-	
+
+	private static final Logger LOG = Logger.getLogger(QueryStatusManager.class);
+
+	public Map<String, Object> getStatus() {
+		return status;
+	}
+
+	public void setStatus(Map<String, Object> status) {
+		this.status = status;
+	}
+
 	//多线程状态管理容器
-	private Map<String,Object> status = Collections.synchronizedMap(new HashMap<String,Object>()) ;
+	private Map<String,Object> status = Collections.synchronizedMap(new HashMap<String,Object>());
 	//多线程查询结果list
 	private List<Record> results = Collections.synchronizedList(new ArrayList<Record>());
 
@@ -54,8 +65,10 @@ public class QueryStatusManager {
 	 */
 	public synchronized boolean isCompleted(){
 		if(status.containsValue(false)){
+//			LOG.info("query state contain fase,query no completed");
 			return false;
 		}
+		LOG.info("query state ： true,query completed");
 		return true;
 	}
 	

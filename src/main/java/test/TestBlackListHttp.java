@@ -12,62 +12,21 @@ public class TestBlackListHttp {
         //172.3.6.2_3652_1416453486_0
         //String json = "{\"channelId\": \"192.168.9.14_9087\",\"type\": \"2\",\"blackListNo\": \"222\",\"warnValue\": \"0.26\",\"startTime\": \"2014-11-26 12:30:00\",\"endTime\": \"2014-11-26 12:59:00\"}";
         //String json = "{\"channelId\": \"172.16.5.50_0\",\"type\": \"2\",\"blackListNo\": \"1175581843\",\"warnValue\": \"0.3\",\"startTime\": \"2014-11-27 14:50:00\",\"endTime\": \"2014-11-27 20:29:42\"}";
-        String json = "{\"channelId\": \"172.16.5.50_0\",\"type\": \"2\",\"blackListNo\": \"1175581843\",\"warnValue\": \"0.0\",\"startTime\": \"2014-11-27 15:50:00\",\"endTime\": \"2015-12-08 13:20:00\"}";
-        String url = "http://localhost:8080/monitor/rest/video/queryBlackList";
-        try {
-            postRequest(json,url);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+        //String json = "{\"channelId\": \"172.16.5.50_0\",\"type\": \"2\",\"blackListNo\": \"1175581843\",\"warnValue\": \"0.0\",\"startTime\": \"2014-11-27 15:50:00\",\"endTime\": \"2015-12-08 13:20:00\"}";
 
-    }
+//        String json = "{\"channelId\": \"172.16.5.50_9,172.16.5.50_1\",\"type\": \"1\",\"blackListAndWarnValue\": \"123:0.12,234:0.34\",\"startTime\": \"2014-12-10 15:50:00\",\"endTime\": \"2014-12-108 17:20:00\"}";
+//        String json = "{\"channelId\": \"192.108.16.142_5,192.168.9.14_2,192.168.9.14_3,192.168.9.14_4\",\"type\":\"1\",\"blackListAndWarnValue\":\"123:0.0\",\"startTime\": \"2015-01-12 08:02:58\",\"endTime\": \"2015-01-12 14:00:03\"}";
 
-    /**
-     * 发送请求到http服务然后接收返回报文
-     * @param jsonStr 请求的json格式的字符串
-     * @param path   请求的http服务的路径
-     * @return 返回请求的响应信息
-     * @throws java.io.IOException
-     */
-    public static String postRequest(String jsonStr, String path)
-            throws IOException {
-        // 得到请求报文的二进制数据
-        byte[] data = jsonStr.getBytes();
-        java.net.URL url = new java.net.URL(path);
-        //openConnection() 返回一个 URLConnection 对象，它表示到 URL 所引用的远程对象的连接
-        java.net.HttpURLConnection conn = (java.net.HttpURLConnection) url.openConnection();// 打开一个连接
-        conn.setRequestMethod("POST");// 设置post方式请求
-        conn.setConnectTimeout(20 * 1000);// 设置连接超时时间为5秒  JDK1.5以上才有此方法
-        conn.setReadTimeout(120 * 1000);// 设置读取超时时间为20秒 JDK1.5以上才有此方法
-        // 打算使用 URL 连接进行输出，则将 DoOutput 标志设置为 true
-        conn.setDoOutput(true);
-        // 这里只设置内容类型与内容长度的头字段根据传送内容决定
-        // 内容类型Content-Type:
-        // application/x-www-form-urlencoded、text/xml;charset=GBK
-        // 内容长度Content-Length: 38
-        conn.setRequestProperty("Content-Type", "application/json; charset=UTF-8");
-        conn.setRequestProperty("Content-Length", String.valueOf(data.length));
-        conn.setRequestProperty("Accept-Encoding", "gzip, deflate");
-        OutputStream outStream = conn.getOutputStream();// 返回写入到此连接的输出流
-        // 把二进制数据写入是输出流
-        outStream.write(data);
-        // 内存中的数据刷入
-        outStream.flush();
-        //关闭流
-        outStream.close();
+        String json = "{\"channelId\": \"192.143.154.153_7,192.143.24.103_3,192.144.194.210_4\",\"type\":\"1\",\"blackListAndWarnValue\":\"123:0.0\",\"startTime\": \"2015-01-12 08:02:58\",\"endTime\": \"2015-01-13 14:00:03\"}";
 
-        String msg = "";// 保存调用http服务后的响应信息
-        // 如果请求响应码是200，则表示成功
-        if (conn.getResponseCode() == 200) {
-            // HTTP服务端返回的编码是UTF-8,故必须设置为UTF-8,保持编码统一,否则会出现中文乱码
-            BufferedReader in = new BufferedReader(new InputStreamReader(
-                    (InputStream) conn.getInputStream(), "UTF-8"));//返回从此打开的连接读取的输入流
-            msg = in.readLine();
-            System.out.println("===========: " + msg);
-            in.close();
-        }
-        conn.disconnect();// 断开连接
-        return msg;
+
+        String url = "http://localhost:8080/monitor/rest/blacklist/query";
+
+           for(int i = 0; i < 10 ; i ++){
+               Thread thread = new Thread(new PostThread(url,json));
+               thread.start();
+           }
+
     }
 
 }

@@ -48,6 +48,8 @@ public interface Query {
      */
     public byte[] queryFaceImg(String rowkey) ;
 
+    public boolean createTable(String tableName);
+
     /**
      * 根据rowkey获取相关的记录
      * @param rowkey
@@ -62,5 +64,11 @@ public interface Query {
      * @return
      */
     public List<Record> queryBlackList(QueryBean query);
-	
+
+    /**
+     * 查询黑名单
+     * @param query
+     * @return
+     */
+    public List<Record> queryMutilBlackList(QueryBean query);
 }
